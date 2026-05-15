@@ -10,3 +10,7 @@ tqdm
 tensorflow       
 seaborn
 pandas
+rembg
+rembg[cpu]
+rembg[gpu]
+grad-cam
