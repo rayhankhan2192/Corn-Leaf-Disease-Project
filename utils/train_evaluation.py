@@ -194,21 +194,33 @@ class Trainer:
         """Generates and saves Grad-CAM heatmaps for a subset of the test data."""
         logger.info("Generating Grad-CAM Visualizations...")
         
+        # 2. Dynamically find the target layer based on YOUR specific model wrappers
         target_layers = []
         if self.model_name == "customcnn":
-            target_layers = [self.model.features[-1]]
+            # Target the last Conv2d layer (index -3), skipping the ReLU and Pool
+            target_layers = [self.model.features[-3]]
+            
         elif self.model_name == "resnet50":
-            target_layers = [self.model.layer4[-1]]
+            target_layers = [self.model.backbone.layer4[-1]]
+            
         elif self.model_name == "efficientnetb3":
-            target_layers = [self.model.features[-1]]
+            target_layers = [self.model.backbone.features[-1]]
+            
         elif self.model_name == "mobilenetv3":
-            target_layers = [self.model.features[-1]]
-        elif self.model_name == "vgg19":
-            target_layers = [self.model.features[-1]]
+            target_layers = [self.model.backbone[-1]]
+            
         elif self.model_name == "densenet121":
-            target_layers = [self.model.features.norm5]
+            target_layers = [self.model.backbone.features.norm5]
+            
+        elif self.model_name == "vgg19":
+            target_layers = [self.model.backbone.features[-1]]
+            
+        elif self.model_name == "hybridmodel":
+            # Target the CNN branch to see exactly what local features it's looking at
+            target_layers = [self.model.cnn_branch[-1]]
+            
         elif self.model_name == "vitb16":
-            logger.warning("Standard Grad-CAM doesn't work well with ViT out-of-the-box. Skipping Grad-CAM.")
+            logger.warning("Standard Grad-CAM requires 2D feature maps. ViT uses 1D tokens. Skipping Grad-CAM.")
             return
         else:
             logger.warning(f"Target layer mapping not defined for {self.model_name}. Skipping Grad-CAM.")
